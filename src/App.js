@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import Login from "./components/Login";
 import { getTokenFromResponse } from "./spotify";
@@ -31,6 +31,13 @@ function App() {
         dispatch({
           type: "SET_USER",
           user: user,
+        });
+      });
+      spotify.getUserPlaylists().then((playlists) => {
+        console.log(playlists);
+        dispatch({
+          type: "SET_PLAYLISTS",
+          playlists,
         });
       });
     }
