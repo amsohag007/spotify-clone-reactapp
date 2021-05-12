@@ -12,23 +12,23 @@ import "./Footer.css";
 import { Grid, Slider } from "@material-ui/core";
 
 function Footer({ spotify }) {
-  const [{ token, item, playing }, dispatch] = useStateValue();
+  const [{ item, playing }, dispatch] = useStateValue();
 
-  // useEffect(() => {
-  //   spotify.getMyCurrentPlaybackState().then((r) => {
-  //     console.log(r);
+  useEffect(() => {
+    spotify.getMyCurrentPlaybackState().then((r) => {
+      console.log(r);
 
-  //     dispatch({
-  //       type: "SET_PLAYING",
-  //       playing: r.is_playing,
-  //     });
+      dispatch({
+        type: "SET_PLAYING",
+        playing: r.is_playing,
+      });
 
-  //     dispatch({
-  //       type: "SET_ITEM",
-  //       item: r.item,
-  //     });
-  //   });
-  // }, [spotify]);
+      dispatch({
+        type: "SET_ITEM",
+        item: r.item,
+      });
+    });
+  }, [spotify, dispatch]);
 
   const handlePlayPause = () => {
     if (playing) {
@@ -90,7 +90,11 @@ function Footer({ spotify }) {
         ) : (
           <div className="footer__songInfo">
             <h4>No song is playing</h4>
-            <p>...</p>
+            <p>
+              Spotify Player may not work properly after ending of
+              web-playback-sdk validation...
+            </p>
+            );
           </div>
         )}
       </div>

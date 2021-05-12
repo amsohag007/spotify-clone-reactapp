@@ -1,52 +1,70 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import SpotifyWebApi from "spotify-web-api-js";
+import { useStateValue } from "./StateProvider";
+
+import { getTokenFromResponse } from "./spotify";
 import "./App.css";
 import Login from "./components/Login";
-import { getTokenFromResponse } from "./spotify";
-import SpotifyWebApi from "spotify-web-api-js";
 import Player from "./components/Player";
-import { useStateValue } from "./StateProvider";
 
 const spotify = new SpotifyWebApi();
 
 function App() {
-  const [{ user, token }, dispatch] = useStateValue();
+  const [{ token }, dispatch] = useStateValue();
 
   useEffect(() => {
+    // Set token
     const hash = getTokenFromResponse();
-    // c onsole.log("token>", hash);
     window.location.hash = "";
-    const _token = hash.access_token;
+    let _token = hash.access_token;
 
     if (_token) {
+      spotify.setAccessToken(_token);
+
       dispatch({
         type: "SET_TOKEN",
         token: _token,
       });
 
-      spotify.setAccessToken(_token);
+      spotify.getPlaylist("37i9dQZEVXcJZyENOWUFo7").then((response) =>
+        dispatch({
+          type: "SET_DISCOVER_WEEKLY",
+          discover_weekly: response,
+        })
+      );
+
+      spotify.getMyTopArtists().then((response) =>
+        dispatch({
+          type: "SET_TOP_ARTISTS",
+          top_artists: response,
+        })
+      );
+
+      dispatch({
+        type: "SET_SPOTIFY",
+        spotify: spotify,
+      });
 
       spotify.getMe().then((user) => {
-        //console.log("me>", user);
-
         dispatch({
           type: "SET_USER",
           user: user,
         });
       });
+
       spotify.getUserPlaylists().then((playlists) => {
-        console.log(playlists);
         dispatch({
           type: "SET_PLAYLISTS",
-          playlists,
+          playlists: playlists,
         });
       });
     }
-  }, [dispatch]);
-  // console.log("meUser>", user);
-  // console.log("mytoken>", token);
+  }, [token, dispatch]);
+
   return (
-    <div className="App">
-      {token ? <Player spotify={spotify} /> : <Login />}
+    <div className="app">
+      {!token && <Login />}
+      {token && <Player spotify={spotify} />}
     </div>
   );
 }
